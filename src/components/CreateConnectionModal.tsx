@@ -212,6 +212,7 @@ const CreateConnectionModal = (props: Props) => {
               itemList={[
                 { value: Engine.MySQL, label: "MySQL" },
                 { value: Engine.PostgreSQL, label: "PostgreSQL" },
+                { value: Engine.MSSQL, label: "MSSQL" },
               ]}
               onValueChange={(value) => setPartialConnection({ engineType: value as Engine })}
             />
@@ -254,7 +255,7 @@ const CreateConnectionModal = (props: Props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">SSL</label>
             <div className="w-full flex flex-row justify-start items-start flex-wrap">
               {SSLTypeOptions.map((option) => (
-                <label key={option.value} className="w-auto flex flex-row justify-start items-center cursor-pointer mr-3 mb-2">
+                <label key={option.value} className="w-auto flex flex-row justify-start items-center cursor-pointer mr-3 mb-3">
                   <input
                     type="radio"
                     className="radio w-4 h-4 mr-1"
@@ -319,6 +320,22 @@ const CreateConnectionModal = (props: Props) => {
                   </div>
                 </div>
               </>
+            )}
+            {connection.engineType === Engine.MSSQL && (
+              <div className="w-full flex flex-col">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Encrypt</label>
+                <div className="w-full flex flex-row justify-start items-start flex-wrap">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                      checked={connection.encrypt}
+                      onChange={(e) => setPartialConnection({ encrypt: e.target.checked })}
+                    />
+                    <span className="ml-2 text-sm">Encrypt connection</span>
+                  </label>
+                </div>
+              </div>
             )}
           </div>
         </div>

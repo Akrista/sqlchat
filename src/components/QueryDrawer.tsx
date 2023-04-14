@@ -1,41 +1,39 @@
 import { Drawer } from "@mui/material";
-import { head } from "lodash-es";
 import { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import TextareaAutosize from "react-textarea-autosize";
 import { useQueryStore } from "@/store";
-import { ResponseObject } from "@/types";
+import { ExecutionResult, ResponseObject } from "@/types";
+import { checkStatementIsSelect, getMessageFromExecutionResult } from "@/utils";
+import Tooltip from "./kit/Tooltip";
 import Icon from "./Icon";
 import EngineIcon from "./EngineIcon";
-
-type RawQueryResult = {
-  [key: string]: any;
-};
+import DataTableView from "./ExecutionView/DataTableView";
+import NotificationView from "./ExecutionView/NotificationView";
+import ExecutionWarningBanner from "./ExecutionView/ExecutionWarningBanner";
 
 const QueryDrawer = () => {
   const { t } = useTranslation();
   const queryStore = useQueryStore();
-  const [rawResults, setRawResults] = useState<RawQueryResult[]>([]);
+  const [executionResult, setExecutionResult] = useState<ExecutionResult | undefined>(undefined);
+  const [statement, setStatement] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const context = queryStore.context;
-  const [statement, setStatement] = useState<string>(context?.statement || "");
-  const [isLoading, setIsLoading] = useState(true);
-  const columns = Object.keys(head(rawResults) || {}).map((key) => {
-    return {
-      name: key,
-      sortable: true,
-      selector: (row: RawQueryResult) => row[key],
-    };
-  });
+  const executionMessage = executionResult ? getMessageFromExecutionResult(executionResult) : "";
+  const showExecutionWarningBanner = !checkStatementIsSelect(statement);
 
   useEffect(() => {
     if (!queryStore.showDrawer) {
       return;
     }
 
-    setStatement(context?.statement || "");
-    executeStatement(context?.statement || "");
+    const statement = context?.statement || "";
+    setStatement(statement);
+    if (statement !== "" && checkStatementIsSelect(statement)) {
+      executeStatement(statement);
+    }
+    setExecutionResult(undefined);
   }, [context, queryStore.showDrawer]);
 
   const executeStatement = async (statement: string) => {
@@ -47,12 +45,12 @@ const QueryDrawer = () => {
     if (!context) {
       toast.error("No execution context found.");
       setIsLoading(false);
-      setRawResults([]);
+      setExecutionResult(undefined);
       return;
     }
 
     setIsLoading(true);
-    setRawResults([]);
+    setExecutionResult(undefined);
     const { connection, database } = context;
     try {
       const response = await fetch("/api/connection/execute", {
@@ -66,11 +64,14 @@ const QueryDrawer = () => {
           statement,
         }),
       });
-      const result = (await response.json()) as ResponseObject<RawQueryResult[]>;
+      const result = (await response.json()) as ResponseObject<ExecutionResult>;
       if (result.message) {
-        toast.error(result.message);
+        setExecutionResult({
+          rawResult: [],
+          error: result.message,
+        });
       } else {
-        setRawResults(result.data);
+        setExecutionResult(result.data);
       }
     } catch (error) {
       console.error(error);
@@ -101,9 +102,10 @@ const QueryDrawer = () => {
               <EngineIcon className="w-6 h-auto" engine={context.connection.engineType} />
               <span>{context.database?.name}</span>
             </div>
+            {showExecutionWarningBanner && <ExecutionWarningBanner className="rounded-lg mt-4" />}
             <div className="w-full h-auto mt-4 px-2 flex flex-row justify-between items-end border dark:border-zinc-700 rounded-lg overflow-clip">
               <TextareaAutosize
-                className="w-full h-full outline-none border-none bg-transparent leading-6 pl-2 py-2 resize-none hide-scrollbar text-sm font-mono break-all"
+                className="w-full h-full outline-none border-none bg-transparent leading-6 pl-2 py-2 resize-none hide-scrollbar text-sm font-mono break-all whitespace-pre-wrap"
                 value={statement}
                 rows={1}
                 minRows={1}
@@ -111,12 +113,14 @@ const QueryDrawer = () => {
                 placeholder="Enter your SQL statement here..."
                 onChange={(e) => setStatement(e.target.value)}
               />
-              <button
-                className="w-8 p-1 -translate-y-1 cursor-pointer rounded-md hover:shadow hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-                onClick={() => executeStatement(statement)}
-              >
-                <Icon.IoPlay className="w-full h-auto text-indigo-600" />
-              </button>
+              <Tooltip title={t("common.execute")} side="top">
+                <button
+                  className="w-6 p-1 -translate-y-2 cursor-pointer rounded-md hover:shadow opacity-90 hover:opacity-100 bg-indigo-600 text-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => executeStatement(statement)}
+                >
+                  <Icon.IoPlay className="w-full h-auto" />
+                </button>
+              </Tooltip>
             </div>
             <div className="w-full flex flex-col justify-start items-start mt-4">
               {isLoading ? (
@@ -124,22 +128,18 @@ const QueryDrawer = () => {
                   <Icon.BiLoaderAlt className="w-7 h-auto opacity-70 animate-spin" />
                   <span className="text-sm font-mono text-gray-500 mt-2">{t("execution.message.executing")}</span>
                 </div>
-              ) : rawResults.length === 0 ? (
-                <div className="w-full flex flex-col justify-center items-center py-6 pt-10">
-                  <Icon.BsBox2 className="w-7 h-auto opacity-70" />
-                  <span className="text-sm font-mono text-gray-500 mt-2">{t("execution.message.no-data")}</span>
-                </div>
               ) : (
-                <div className="w-full">
-                  <DataTable
-                    className="w-full border !rounded-lg dark:border-zinc-700"
-                    columns={columns}
-                    data={rawResults}
-                    fixedHeader
-                    pagination
-                    responsive
-                  />
-                </div>
+                <>
+                  {executionResult ? (
+                    executionMessage ? (
+                      <NotificationView message={executionMessage} style={executionResult?.error ? "error" : "info"} />
+                    ) : (
+                      <DataTableView rawResults={executionResult?.rawResult || []} />
+                    )
+                  ) : (
+                    <></>
+                  )}
+                </>
               )}
             </div>
           </>

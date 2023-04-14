@@ -3,6 +3,7 @@ import { Id } from ".";
 export enum Engine {
   MySQL = "MYSQL",
   PostgreSQL = "POSTGRESQL",
+  MSSQL = "MSSQL",
 }
 
 export interface SSLOptions {
@@ -21,5 +22,7 @@ export interface Connection {
   password: string;
   // database is only required for PostgreSQL.
   database?: string;
+  // encrypt is only required for MSSQL.
+  encrypt?: boolean;
   ssl?: SSLOptions;
 }

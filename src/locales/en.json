@@ -4,10 +4,12 @@
     "close": "Close",
     "confirm": "Confirm",
     "save": "Save",
+    "edit": "Edit",
     "loading": "Loading",
     "setting": "Setting",
     "copy": "Copy",
-    "delete": "Delete"
+    "delete": "Delete",
+    "execute": "Execute"
   },
   "conversation": {
     "new-chat": "New Chat",
@@ -20,7 +22,7 @@
     "select-database": "Select your database"
   },
   "execution": {
-    "title": "Execute query",
+    "title": "Execute SQL",
     "message": {
       "executing": "Executing query...",
       "no-connection": "No connection selected",
@@ -55,6 +57,7 @@
     "join-wechat-group": "Join WeChat Group"
   },
   "banner": {
-    "data-storage": "Connection settings are stored in your local browser"
+    "data-storage": "Connection settings are stored in your local browser",
+    "non-select-sql-warning": "The current statement may be non-SELECT SQL, which will result in a database schema or data change. Make sure you know what you are doing."
   }
 }
