@@ -9,16 +9,15 @@ import Tooltip from "./kit/Tooltip";
 import Dropdown, { DropdownItem } from "./kit/Dropdown";
 import Icon from "./Icon";
 import EngineIcon from "./EngineIcon";
-import LocaleSwitch from "./LocaleSwitch";
 import DarkModeSwitch from "./DarkModeSwitch";
 import CreateConnectionModal from "./CreateConnectionModal";
 import SettingModal from "./SettingModal";
-import EditConversationTitleModal from "./EditConversationTitleModal";
+import UpdateConversationModal from "./UpdateConversationModal";
 
 interface State {
   showCreateConnectionModal: boolean;
   showSettingModal: boolean;
-  showEditConversationTitleModal: boolean;
+  showUpdateConversationModal: boolean;
 }
 
 const ConnectionSidebar = () => {
@@ -29,10 +28,10 @@ const ConnectionSidebar = () => {
   const [state, setState] = useState<State>({
     showCreateConnectionModal: false,
     showSettingModal: false,
-    showEditConversationTitleModal: false,
+    showUpdateConversationModal: false,
   });
   const [editConnectionModalContext, setEditConnectionModalContext] = useState<Connection>();
-  const [editConversationTitleModalContext, setEditConversationTitleModalContext] = useState<Conversation>();
+  const [updateConversationModalContext, setUpdateConversationModalContext] = useState<Conversation>();
   const [isRequestingDatabase, setIsRequestingDatabase] = useState<boolean>(false);
   const connectionList = connectionStore.connectionList;
   const currentConnectionCtx = connectionStore.currentConnectionCtx;
@@ -88,10 +87,10 @@ const ConnectionSidebar = () => {
     });
   };
 
-  const toggleEditConversationTitleModal = (show = true) => {
+  const toggleUpdateConversationModal = (show = true) => {
     setState({
       ...state,
-      showEditConversationTitleModal: show,
+      showUpdateConversationModal: show,
     });
   };
 
@@ -139,11 +138,11 @@ const ConnectionSidebar = () => {
     }
   };
 
-  const handleEditConversationTitle = (conversation: Conversation) => {
-    setEditConversationTitleModalContext(conversation);
+  const handleEditConversation = (conversation: Conversation) => {
+    setUpdateConversationModalContext(conversation);
     setState({
       ...state,
-      showEditConversationTitleModal: true,
+      showUpdateConversationModal: true,
     });
   };
 
@@ -175,24 +174,25 @@ const ConnectionSidebar = () => {
                 <img src="/chat-logo-bot.webp" className="w-7 h-auto mx-auto" alt="" />
               </button>
               {connectionList.map((connection) => (
-                <button
-                  key={connection.id}
-                  className={`relative w-full h-14 rounded-l-lg p-2 mt-2 group ${
-                    currentConnectionCtx?.connection.id === connection.id && "bg-gray-100 dark:bg-zinc-700 shadow"
-                  }`}
-                  onClick={() => handleConnectionSelect(connection)}
-                >
-                  <span
-                    className="absolute right-0.5 -mt-1.5 opacity-60 hidden group-hover:block hover:opacity-80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditConnection(connection);
-                    }}
+                <Tooltip key={connection.id} title={connection.title} side="right">
+                  <button
+                    className={`relative w-full h-14 rounded-l-lg p-2 mt-2 group ${
+                      currentConnectionCtx?.connection.id === connection.id && "bg-gray-100 dark:bg-zinc-700 shadow"
+                    }`}
+                    onClick={() => handleConnectionSelect(connection)}
                   >
-                    <Icon.FiEdit3 className="w-3.5 h-auto dark:text-gray-300" />
-                  </span>
-                  <EngineIcon engine={connection.engineType} className="w-auto h-full mx-auto dark:text-gray-300" />
-                </button>
+                    <span
+                      className="absolute right-0.5 -mt-1.5 opacity-60 hidden group-hover:block hover:opacity-80"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditConnection(connection);
+                      }}
+                    >
+                      <Icon.FiEdit3 className="w-3.5 h-auto dark:text-gray-300" />
+                    </span>
+                    <EngineIcon engine={connection.engineType} className="w-auto h-full mx-auto dark:text-gray-300" />
+                  </button>
+                </Tooltip>
               ))}
               <Tooltip title={t("connection.new")} side="right">
                 <button
@@ -205,7 +205,6 @@ const ConnectionSidebar = () => {
             </div>
             <div className="w-full flex flex-col justify-end items-center">
               <DarkModeSwitch />
-              <LocaleSwitch />
               <Tooltip title={t("common.setting")} side="right">
                 <button
                   className=" w-10 h-10 p-1 rounded-full flex flex-row justify-center items-center hover:bg-gray-100 dark:hover:bg-zinc-700"
@@ -265,16 +264,16 @@ const ConnectionSidebar = () => {
                     <div className="p-1 flex flex-col justify-start items-start bg-white dark:bg-zinc-900 shadow-lg rounded-lg">
                       <DropdownItem
                         className="w-full p-1 px-2 flex flex-row justify-start items-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
-                        onClick={() => handleEditConversationTitle(conversation)}
+                        onClick={() => handleEditConversation(conversation)}
                       >
-                        <Icon.FiEdit3 className="w-4 h-auto mr-1 opacity-70" />
+                        <Icon.FiEdit3 className="w-4 h-auto mr-2 opacity-70" />
                         {t("common.edit")}
                       </DropdownItem>
                       <DropdownItem
                         className="w-full p-1 px-2 flex flex-row justify-start items-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
                         onClick={() => handleDeleteConversation(conversation)}
                       >
-                        <Icon.IoTrash className="w-4 h-auto mr-1 opacity-70" />
+                        <Icon.IoTrash className="w-4 h-auto mr-2 opacity-70" />
                         {t("common.delete")}
                       </DropdownItem>
                     </div>
@@ -289,10 +288,36 @@ const ConnectionSidebar = () => {
                 {t("conversation.new-chat")}
               </button>
             </div>
-            <div className="sticky bottom-0 w-full flex justify-center bg-gray-100 dark:bg-zinc-700  backdrop-blur bg-opacity-60 pb-6 py-2">
+            <div className="sticky bottom-0 w-full flex flex-col justify-center bg-gray-100 dark:bg-zinc-700  backdrop-blur bg-opacity-60 pb-6 py-2">
+              <a
+                className="dark:hidden"
+                href="https://www.producthunt.com/posts/sql-chat-2?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-sql&#0045;chat&#0045;2"
+                target="_blank"
+              >
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=390216&theme=light"
+                  alt="SQL&#0032;Chat - ChatGPT&#0032;powered&#0032;SQL&#0032;client&#0032;for&#0032;Postgres&#0044;&#0032;MySQL&#0032;&#0038;&#0032;SQL&#0032;Server | Product Hunt"
+                  style={{ width: "250px", height: "54px" }}
+                  width="250"
+                  height="54"
+                />
+              </a>
+              <a
+                className="hidden dark:block"
+                href="https://www.producthunt.com/posts/sql-chat-2?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-sql&#0045;chat&#0045;2"
+                target="_blank"
+              >
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=390216&theme=dark"
+                  alt="SQL&#0032;Chat - ChatGPT&#0032;powered&#0032;SQL&#0032;client&#0032;for&#0032;Postgres&#0044;&#0032;MySQL&#0032;&#0038;&#0032;SQL&#0032;Server | Product Hunt"
+                  style={{ width: "250px", height: "54px" }}
+                  width="250"
+                  height="54"
+                />
+              </a>
               <a
                 href="https://discord.gg/z6kakemDjm"
-                className="text-indigo-600 dark:text-indigo-400 text-sm font-medium flex flex-row justify-center items-center hover:underline"
+                className="text-indigo-600 dark:text-indigo-400 text-sm font-medium flex flex-row justify-center items-center mt-4 hover:underline"
                 target="_blank"
               >
                 <Icon.BsDiscord className="w-4 h-auto mr-1" />
@@ -309,11 +334,8 @@ const ConnectionSidebar = () => {
 
       {state.showSettingModal && <SettingModal close={() => toggleSettingModal(false)} />}
 
-      {editConversationTitleModalContext && state.showEditConversationTitleModal && (
-        <EditConversationTitleModal
-          close={() => toggleEditConversationTitleModal(false)}
-          conversation={editConversationTitleModalContext}
-        />
+      {updateConversationModalContext && state.showUpdateConversationModal && (
+        <UpdateConversationModal close={() => toggleUpdateConversationModal(false)} conversation={updateConversationModalContext} />
       )}
     </>
   );

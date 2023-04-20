@@ -14,12 +14,25 @@
   "conversation": {
     "new-chat": "New Chat",
     "conversation-title": "Conversation title",
-    "edit-title": "Edit conversation title"
+    "update": "Update conversation",
+    "title": "Title"
   },
   "connection": {
     "self": "Connection",
     "new": "Create Connection",
-    "select-database": "Select your database"
+    "edit": "Edit Connection",
+    "select-database": "Select your database",
+    "database-type": "Database type",
+    "title": "Title",
+    "host": "Host",
+    "port": "Port",
+    "database-name": "Database name",
+    "username": "Username",
+    "password": "Password"
+  },
+  "assistant": {
+    "self": "Bot",
+    "create-your-bot": "Can't find the bot you need? Create one"
   },
   "execution": {
     "title": "Execute SQL",
@@ -58,6 +71,7 @@
   },
   "banner": {
     "data-storage": "Connection settings are stored in your local browser",
-    "non-select-sql-warning": "The current statement may be non-SELECT SQL, which will result in a database schema or data change. Make sure you know what you are doing."
+    "non-select-sql-warning": "The current statement may be non-SELECT SQL, which will result in a database schema or data change. Make sure you know what you are doing.",
+    "product-hunt": "🚀🚀🚀 We just launched on Product Hunt, please give us a vote! 🚀🚀🚀"
   }
 }

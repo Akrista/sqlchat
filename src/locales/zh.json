@@ -14,12 +14,25 @@
   "conversation": {
     "new-chat": "新建会话",
     "conversation-title": "会话标题",
-    "edit-title": "编辑会话标题"
+    "update": "更新会话",
+    "title": "标题"
   },
   "connection": {
     "self": "连接",
     "new": "创建连接",
-    "select-database": "选择数据库"
+    "edit": "编辑连接",
+    "select-database": "选择数据库",
+    "database-type": "数据库类型",
+    "title": "标题",
+    "host": "主机",
+    "port": "端口",
+    "database-name": "数据库",
+    "username": "用户名",
+    "password": "密码"
+  },
+  "assistant": {
+    "self": "机器人",
+    "create-your-bot": "找不到需要的机器人？创建一个"
   },
   "execution": {
     "title": "执行 SQL",
@@ -58,6 +71,7 @@
   },
   "banner": {
     "data-storage": "连接设置存储在您的本地浏览器中",
-    "non-select-sql-warning": "当前语句可能是非 SELECT SQL，这将导致数据库模式或数据变化。"
+    "non-select-sql-warning": "当前语句可能是非 SELECT SQL，这将导致数据库模式或数据变化。",
+    "product-hunt": "🚀🚀🚀 我们刚在 Product Hunt 发布, 来给我们点个赞! 🚀🚀🚀"
   }
 }
